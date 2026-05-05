@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using System.IO;
+using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using UnityEngine.SceneManagement;
 using System;
@@ -18,6 +19,7 @@ public partial class MalumMenu : BasePlugin
     public Harmony Harmony { get; } = new(Id);
     public static MalumMenu Plugin;
     public new static ManualLogSource Log;
+    public static readonly string ProfilePath = Path.Combine(Paths.ConfigPath, "MalumProfile.txt");
 
     public static MenuUI menuUI;
     public static ConsoleUI consoleUI;
@@ -202,7 +204,13 @@ public partial class MalumMenu : BasePlugin
             PerformanceReporting.enabled = false;
         }
 
-        // Load profile on start
+        // Create profile file if it is missing
+        if (!File.Exists(ProfilePath))
+        {
+            CheatToggles.SaveTogglesToProfile();
+        }
+
+        // Auto load profile on start if needed
         if (autoLoadProfile.Value)
         {
             CheatToggles.LoadTogglesFromProfile();
