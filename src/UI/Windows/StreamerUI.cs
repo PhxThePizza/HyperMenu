@@ -22,6 +22,8 @@ public class StreamerUI : MonoBehaviour
     {
         Cleanup();
         StreamerNativeWindowHost.Stop();
+        _hostStarted = false;
+        _captureQueued = false;
     }
 
     private void LateUpdate()
@@ -30,24 +32,26 @@ public class StreamerUI : MonoBehaviour
         {
             Cleanup();
             StreamerNativeWindowHost.Stop();
+            _hostStarted = false;
             _captureQueued = false;
             return;
         }
 
-        var sourceCamera = Camera.main;
+        var sourceCamera = ResolveSourceCamera();
         if (!sourceCamera)
         {
             Cleanup();
             return;
         }
 
-        if (!_hostStarted)
+        if (!_hostStarted || !StreamerNativeWindowHost.IsRunning)
         {
             StreamerNativeWindowHost.Start();
             _hostStarted = true;
         }
 
-        if (_captureQueued) return;
+        if (_captureQueued || !isActiveAndEnabled || !gameObject.activeInHierarchy) return;
+
         _captureQueued = true;
         StartCoroutine(nameof(CaptureFrame));
     }
@@ -56,87 +60,90 @@ public class StreamerUI : MonoBehaviour
     {
         yield return new WaitForEndOfFrame();
 
-        if (!CheatToggles.streamerMode || MalumMenu.isPanicked)
+        try
         {
-            _captureQueued = false;
-            yield break;
-        }
-
-        var sourceCamera = Camera.main;
-        if (!sourceCamera)
-        {
-            Cleanup();
-            _captureQueued = false;
-            yield break;
-        }
-
-        EnsureCaptureCamera(sourceCamera);
-        EnsureUiCaptureCamera();
-        if (!_captureCamera || !_renderTexture)
-        {
-            _captureQueued = false;
-            yield break;
-        }
-
-        var disabledLineRenderers = DisableESPLineRenderers();
-
-        _captureCamera.transform.SetPositionAndRotation(sourceCamera.transform.position, sourceCamera.transform.rotation);
-        _captureCamera.orthographic = sourceCamera.orthographic;
-        _captureCamera.orthographicSize = sourceCamera.orthographicSize;
-        _captureCamera.fieldOfView = sourceCamera.fieldOfView;
-        _captureCamera.nearClipPlane = sourceCamera.nearClipPlane;
-        _captureCamera.farClipPlane = sourceCamera.farClipPlane;
-        _captureCamera.backgroundColor = sourceCamera.backgroundColor;
-        _captureCamera.clearFlags = sourceCamera.clearFlags;
-        _captureCamera.cullingMask = sourceCamera.cullingMask;
-        _captureCamera.allowHDR = sourceCamera.allowHDR;
-        _captureCamera.allowMSAA = sourceCamera.allowMSAA;
-        _captureCamera.targetTexture = _renderTexture;
-        _captureCamera.Render();
-
-        if (_uiCaptureCamera)
-        {
-            var hudManager = DestroyableSingleton<HudManager>.Instance;
-            if (hudManager)
+            if (!CheatToggles.streamerMode || MalumMenu.isPanicked)
             {
-                _uiCaptureCamera.transform.SetPositionAndRotation(hudManager.UICamera.transform.position, hudManager.UICamera.transform.rotation);
-                _uiCaptureCamera.orthographic = hudManager.UICamera.orthographic;
-                _uiCaptureCamera.orthographicSize = hudManager.UICamera.orthographicSize;
-                _uiCaptureCamera.fieldOfView = hudManager.UICamera.fieldOfView;
-                _uiCaptureCamera.nearClipPlane = hudManager.UICamera.nearClipPlane;
-                _uiCaptureCamera.farClipPlane = hudManager.UICamera.farClipPlane;
-                _uiCaptureCamera.backgroundColor = hudManager.UICamera.backgroundColor;
-                _uiCaptureCamera.clearFlags = CameraClearFlags.Depth;
-                _uiCaptureCamera.cullingMask = hudManager.UICamera.cullingMask;
-                _uiCaptureCamera.allowHDR = hudManager.UICamera.allowHDR;
-                _uiCaptureCamera.allowMSAA = hudManager.UICamera.allowMSAA;
-                _uiCaptureCamera.targetTexture = _renderTexture;
-                _uiCaptureCamera.Render();
-            }
-        }
-
-        if (_captureTexture == null || _captureTexture.width != _renderTexture.width || _captureTexture.height != _renderTexture.height)
-        {
-            if (_captureTexture != null)
-            {
-                Destroy(_captureTexture);
+                yield break;
             }
 
-            _captureTexture = new Texture2D(_renderTexture.width, _renderTexture.height, TextureFormat.RGBA32, false)
+            var sourceCamera = ResolveSourceCamera();
+            if (!sourceCamera)
             {
-                hideFlags = HideFlags.HideAndDontSave
-            };
+                Cleanup();
+                yield break;
+            }
+
+            EnsureCaptureCamera(sourceCamera);
+            EnsureUiCaptureCamera();
+            if (!_captureCamera || !_renderTexture)
+            {
+                yield break;
+            }
+
+            var disabledLineRenderers = DisableESPLineRenderers();
+
+            _captureCamera.transform.SetPositionAndRotation(sourceCamera.transform.position, sourceCamera.transform.rotation);
+            _captureCamera.orthographic = sourceCamera.orthographic;
+            _captureCamera.orthographicSize = sourceCamera.orthographicSize;
+            _captureCamera.fieldOfView = sourceCamera.fieldOfView;
+            _captureCamera.nearClipPlane = sourceCamera.nearClipPlane;
+            _captureCamera.farClipPlane = sourceCamera.farClipPlane;
+            _captureCamera.backgroundColor = sourceCamera.backgroundColor;
+            _captureCamera.clearFlags = sourceCamera.clearFlags;
+            _captureCamera.cullingMask = sourceCamera.cullingMask;
+            _captureCamera.allowHDR = sourceCamera.allowHDR;
+            _captureCamera.allowMSAA = sourceCamera.allowMSAA;
+            _captureCamera.targetTexture = _renderTexture;
+            _captureCamera.Render();
+
+            if (_uiCaptureCamera)
+            {
+                var hudManager = DestroyableSingleton<HudManager>.Instance;
+                if (hudManager)
+                {
+                    _uiCaptureCamera.transform.SetPositionAndRotation(hudManager.UICamera.transform.position, hudManager.UICamera.transform.rotation);
+                    _uiCaptureCamera.orthographic = hudManager.UICamera.orthographic;
+                    _uiCaptureCamera.orthographicSize = hudManager.UICamera.orthographicSize;
+                    _uiCaptureCamera.fieldOfView = hudManager.UICamera.fieldOfView;
+                    _uiCaptureCamera.nearClipPlane = hudManager.UICamera.nearClipPlane;
+                    _uiCaptureCamera.farClipPlane = hudManager.UICamera.farClipPlane;
+                    _uiCaptureCamera.backgroundColor = hudManager.UICamera.backgroundColor;
+                    _uiCaptureCamera.clearFlags = CameraClearFlags.Depth;
+                    _uiCaptureCamera.cullingMask = hudManager.UICamera.cullingMask;
+                    _uiCaptureCamera.allowHDR = hudManager.UICamera.allowHDR;
+                    _uiCaptureCamera.allowMSAA = hudManager.UICamera.allowMSAA;
+                    _uiCaptureCamera.targetTexture = _renderTexture;
+                    _uiCaptureCamera.Render();
+                }
+            }
+
+            if (_captureTexture == null || _captureTexture.width != _renderTexture.width || _captureTexture.height != _renderTexture.height)
+            {
+                if (_captureTexture != null)
+                {
+                    Destroy(_captureTexture);
+                }
+
+                _captureTexture = new Texture2D(_renderTexture.width, _renderTexture.height, TextureFormat.RGBA32, false)
+                {
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+            }
+
+            var previous = RenderTexture.active;
+            RenderTexture.active = _renderTexture;
+            _captureTexture.ReadPixels(new Rect(0f, 0f, _renderTexture.width, _renderTexture.height), 0, 0, false);
+            _captureTexture.Apply(false, false);
+            RenderTexture.active = previous;
+
+            RestoreESPLineRenderers(disabledLineRenderers);
+            StreamerNativeWindowHost.UpdateFrame(_captureTexture.GetPixels32(), _captureTexture.width, _captureTexture.height);
         }
-
-        var previous = RenderTexture.active;
-        RenderTexture.active = _renderTexture;
-        _captureTexture.ReadPixels(new Rect(0f, 0f, _renderTexture.width, _renderTexture.height), 0, 0, false);
-        _captureTexture.Apply(false, false);
-        RenderTexture.active = previous;
-
-        RestoreESPLineRenderers(disabledLineRenderers);
-        StreamerNativeWindowHost.UpdateFrame(_captureTexture.GetPixels32(), _captureTexture.width, _captureTexture.height);
-        _captureQueued = false;
+        finally
+        {
+            _captureQueued = false;
+        }
     }
 
     private void EnsureCaptureCamera(Camera sourceCamera)
@@ -234,6 +241,26 @@ public class StreamerUI : MonoBehaviour
             Destroy(_captureTexture);
             _captureTexture = null;
         }
+    }
+
+    private static Camera ResolveSourceCamera()
+    {
+        var main = Camera.main;
+        if (main && main.GetComponent<FollowerCamera>())
+        {
+            return main;
+        }
+
+        foreach (var camera in UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
+        {
+            if (!camera || !camera.isActiveAndEnabled) continue;
+            if (camera.GetComponent<FollowerCamera>())
+            {
+                return camera;
+            }
+        }
+
+        return main;
     }
 }
 
@@ -515,6 +542,8 @@ internal static class StreamerNativeWindowHost
             handle.Free();
         }
     }
+
+    public static bool IsRunning => _running && _thread != null && _thread.IsAlive;
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr CreateWindowEx(int dwExStyle, string lpClassName, string lpWindowName, int dwStyle,
