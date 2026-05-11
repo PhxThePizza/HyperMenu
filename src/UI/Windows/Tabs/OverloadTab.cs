@@ -8,7 +8,7 @@ public class OverloadTab : ITab
     public string name => "Overload";
 
     private GUIStyle _sliderSubtitle;
-    private int _maxStrength = 10000;
+    private int _maxStrength = 100000;
     private float _maxCooldown = 1f;
     private float _fpsEstimate = 0f;
     private float _rawCooldown;
@@ -202,6 +202,7 @@ public class OverloadTab : ITab
     private void DrawSettingsSliders()
     {
         GUILayout.Label($"Strength : {_rawStrength}", _sliderSubtitle);
+
         GUILayout.Space(1);
 
         GUILayout.BeginHorizontal();
@@ -215,13 +216,16 @@ public class OverloadTab : ITab
         }
 
         GUILayout.Space(5);
-        bool isPressedMaxStrength = GUILayout.Button($"{_maxStrength}", GUILayout.Width(51f));
+
+        string maxStrengthStr = _maxStrength % 1000 == 0 ? $"{_maxStrength / 1000}K" : $"{_maxStrength}";
+        bool isPressedMaxStrength = GUILayout.Button(maxStrengthStr, GUILayout.Width(51f));
 
         GUILayout.EndHorizontal();
 
         GUILayout.Space(10);
 
         GUILayout.Label($"Cooldown : {_rawCooldown:F2}", _sliderSubtitle);
+
         GUILayout.Space(1);
 
         GUILayout.BeginHorizontal();
@@ -235,6 +239,7 @@ public class OverloadTab : ITab
         }
 
         GUILayout.Space(5);
+
         bool isPressedMaxCooldown = GUILayout.Button($"{_maxCooldown:F0}", GUILayout.Width(51f));
 
         GUILayout.EndHorizontal();
@@ -264,11 +269,11 @@ public class OverloadTab : ITab
 
         if (isPressedMaxStrength)
         {
-            if (_maxStrength >= 10000) // Max _maxStrength = 10000 RPCs
+            if (_maxStrength >= 100000) // Max _maxStrength = 100K RPCs
             {
                 CheatToggles.olAutoAdapt = false; // Disable AutoAdapt if user does manual input
 
-                OverloadHandler.strength = Mathf.RoundToInt(OverloadHandler.strength/100f); // Adjust value to account for max change (÷10)
+                OverloadHandler.strength = Mathf.RoundToInt(OverloadHandler.strength/1000f); // Adjust value to account for max change (÷1000)
 
                 _maxStrength = 100; // Min _maxStrength = 100 RPCs
             }

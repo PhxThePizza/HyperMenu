@@ -59,7 +59,8 @@ https://the-hypermenu-team.github.io/Wiki/
 
 | Mod Version| Among Us - Version | Link |
 |----------|-------------|-----------------|
-| v4.1.0 **[LATEST]** |  2026.3.31  | [Download](https://github.com/The-HyperMenu-Team/HyperMenu/releases/tag/v4.0.4)      |
+| v4.1.1 **[LATEST]** |  2026.3.31  | [Download](https://github.com/The-HyperMenu-Team/HyperMenu/releases/tag/v4.0.4)      |
+| v4.1.0              |  2026.3.31  | [Download](https://github.com/The-HyperMenu-Team/HyperMenu/releases/tag/v4.0.4)      |
 | v4.0.4              |  2026.3.31  | [Download](https://github.com/The-HyperMenu-Team/HyperMenu/releases/tag/v4.0.4)      |
 | v4.0.0              |  2026.3.31  | [Download](https://github.com/The-HyperMenu-Team/HyperMenu/releases/tag/HYPER-4.0.0) |
 | v3.0.4              |  2026.3.31  | [Download](https://github.com/The-HyperMenu-Team/HyperMenu/releases/tag/H3.0.4-02)   |
@@ -157,7 +158,7 @@ Click to expand each topic
 
 <summary><h2>❗ I'm having issues installing HyperMenu</h2></summary>
 
-First of all, make sure you are running the most recent version of Among Us (`17.3` / `2026.3.31`) with the most recent version of HyperMenu (`v4.1.0`).
+First of all, make sure you are running the most recent version of Among Us (`17.3` / `2026.3.31`) with the most recent version of HyperMenu (`v4.1.1`).
 
 Also, check if your platform is officially supported:
 
