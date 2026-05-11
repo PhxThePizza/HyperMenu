@@ -124,10 +124,10 @@ public partial class MalumMenu : BasePlugin
 
         adaptMaxStrength = Config.Bind("MalumMenu.Overload",
                                 "AdaptMaxStrength",
-                                5000,
+                                18000,
                                 new ConfigDescription(
-                                    "Maximum total number of RPCs sent during one overload cycle in AutoAdapt mode. Automatically divided between targets and reduced based on ping. IMPORTANT: Only goes from 1 to 1000 RPCs",
-                                    new AcceptableValueRange<int>(1, 10000)
+                                    "Maximum total number of RPCs sent during one overload cycle in AutoAdapt mode. Automatically divided between targets and reduced based on ping. IMPORTANT: Only goes from 1 to 100K RPCs",
+                                    new AcceptableValueRange<int>(1, 100000)
                                 ));
 
         adaptMaxCooldown = Config.Bind("MalumMenu.Overload",
@@ -145,10 +145,10 @@ public partial class MalumMenu : BasePlugin
 
         defaultStrength = Config.Bind("MalumMenu.Overload",
                                 "DefaultStrength",
-                                5000,
+                                18000,
                                 new ConfigDescription(
-                                    "Default number of malformed RPCs sent to each target during an overload cycle. Overridden if AutoAdapt mode is enabled. IMPORTANT: Only goes from 1 to 1000 RPCs",
-                                    new AcceptableValueRange<int>(1, 10000)
+                                    "Default number of malformed RPCs sent to each target during an overload cycle. Overridden if AutoAdapt mode is enabled. IMPORTANT: Only goes from 1 to 100K RPCs",
+                                    new AcceptableValueRange<int>(1, 100000)
                                 ));
 
         defaultCooldown = Config.Bind("MalumMenu.Overload",
