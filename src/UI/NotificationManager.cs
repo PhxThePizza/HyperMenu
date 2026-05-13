@@ -6,15 +6,39 @@ namespace MalumMenu.ui
 {
     public class NotificationManager : MonoBehaviour
     {
-        public Vector2 boxSize = new Vector2(325, 90);
         public List<Notification> notifications = new List<Notification>();
         public bool DisableNotifications = false;
+
+        public static Vector2 BoxSize
+        {
+            get { return new Vector2(325, 90); }
+        }
+
+        public static Vector2 BoxHeaderSize
+        {
+            get { return new Vector2(BoxSize.x, 17); }
+        }
+
+        public static Vector2 BoxContentPadding
+        {
+            get { return new Vector2(10, 0); }
+        }
+
+        public static Vector2 BoxContentSize
+        {
+            get { return new Vector2(BoxSize.x - BoxContentPadding.x, BoxSize.y - BoxHeaderSize.y - BoxSliderSize.y); }
+        }
+
+        public static Vector2 BoxSliderSize
+        {
+            get { return new Vector2(BoxSize.x, 20); }
+        }
 
         public void Update()
         {
             int notificaions = Math.Min(GetMaxNotifications(), notifications.Count);
 
-            for (byte i = 0; i < notificaions; i++)
+            for (int i = 0; i < notificaions; i++)
             {
                 Notification notification = notifications[i];
                 notification.lifetime += Time.deltaTime;
@@ -46,19 +70,19 @@ namespace MalumMenu.ui
 
         private void RenderNotification(byte position, Notification notification)
         {
-            float boxX = Screen.width - boxSize.x;
-            float boxY = Screen.height - (int)(boxSize.y * (position + 1));
+            float boxX = Screen.width - BoxSize.x;
+            float boxY = Screen.height - (int)(BoxSize.y * (position + 1));
 
-            GUI.Box(new Rect(boxX, boxY, boxSize.x, boxSize.y), notification.title);
+            GUI.Box(new Rect(boxX, boxY, BoxSize.x, BoxSize.y), notification.title);
 
-            GUI.Label(new Rect(boxX + 10, boxY + 17, boxSize.x - 15, boxSize.y - 20), notification.message);
+            GUI.Label(new Rect(boxX + BoxContentPadding.x, boxY + BoxHeaderSize.y, BoxContentSize.x, BoxContentSize.y), notification.message);
 
-            GUI.HorizontalSlider(new Rect(boxX, boxY + 70, boxSize.x, boxSize.y), notification.ttl - notification.lifetime, 0, notification.ttl);
+            GUI.HorizontalSlider(new Rect(boxX, boxY + BoxHeaderSize.y + BoxContentSize.y, BoxSize.x, BoxSize.y), notification.ttl - notification.lifetime, 0, notification.ttl);
         }
 
         public int GetMaxNotifications()
         {
-            return (Screen.height / 2) / (int)boxSize.y;
+            return (Screen.height / 2) / (int)BoxSize.y;
         }
 
         // The time to live value for a notification should be five seconds if it is a success message, and ten seconds if it is a failure message
