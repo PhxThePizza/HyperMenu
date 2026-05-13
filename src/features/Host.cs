@@ -105,9 +105,22 @@ namespace MalumMenu.features
 			}
 		}
 
-		// It is not possible to watch security cameras when the comms sabotage is active. We can abuse this to disable security cameras
-		// When a player starts to watch security cameras, sabotage comms for that player, when the player stops watching cameras, fix comms sabotage for that player
-		[HarmonyPatch(typeof(SecurityCameraSystemType), nameof(SecurityCameraSystemType.UpdateSystem))]
+        [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetKillTimer))]
+        public static class NoKillCooldown
+        {
+            public static bool Enabled { get; set; } = false;
+
+            static void Prefix(PlayerControl __instance, ref float time)
+            {
+                if (!Enabled || __instance != PlayerControl.LocalPlayer) return;
+
+                time = 0;
+            }
+        }
+
+        // It is not possible to watch security cameras when the comms sabotage is active. We can abuse this to disable security cameras
+        // When a player starts to watch security cameras, sabotage comms for that player, when the player stops watching cameras, fix comms sabotage for that player
+        [HarmonyPatch(typeof(SecurityCameraSystemType), nameof(SecurityCameraSystemType.UpdateSystem))]
 		public static class DisableCameras
 		{
 			public static bool Enabled { get; set; } = false;

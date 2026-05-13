@@ -50,18 +50,6 @@ namespace MalumMenu.features
 		}
 		*/
 
-		[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetKillTimer))]
-		public static class NoKillCooldown
-		{
-			public static bool Enabled { get; set; } = false;
-
-			static void Prefix(PlayerControl __instance, ref float time)
-			{
-				if(!Enabled || __instance.PlayerId != PlayerControl.LocalPlayer.PlayerId) return;
-
-				time = 0;
-			}
-		}
 
 		// Clicking the sabotage button has checks to make sure the current player is indeed an imposter, not in a vent, and that the current gamemode supports sabotages
 		// This means setting the GameObject's sabotage button state to active wont allow crewmates to sabotage alone, we need to override the DoClick function to not have those checks
