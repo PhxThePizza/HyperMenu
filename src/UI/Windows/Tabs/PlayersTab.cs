@@ -83,7 +83,7 @@ public class PlayersTab : ITab
 
     private static void DrawPlayerControls(PlayerControl target)
     {
-        if (target == null)
+        if (target == null || target.Data == null)
         {
             GUILayout.Label("Specified target is not valid.");
             return;
