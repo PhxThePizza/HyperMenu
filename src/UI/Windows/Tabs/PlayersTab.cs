@@ -275,8 +275,10 @@ public class PlayersTab : ITab
 
         if (GUILayout.Button("Super Speed"))
         {
+            float maxSpeed = Utilities.IsAnticheatPresent() ? 3.0f : 5.0f;
+
             IGameOptions gameOptions = GameOptions.CreateCloneOptions(GameManager.Instance.LogicOptions.currentGameOptions);
-            gameOptions.SetFloat(FloatOptionNames.PlayerSpeedMod, 3.0f);
+            gameOptions.SetFloat(FloatOptionNames.PlayerSpeedMod, maxSpeed);
             GameOptions.SendGameOptionsToClient(gameOptions, target.OwnerId);
         }
         GUILayout.EndHorizontal();
@@ -308,8 +310,7 @@ public class PlayersTab : ITab
 
         MalumMenu.Log.LogInfo($"Attempting to report {target.Data.PlayerName}'s body, we are not the host so we have to use the ReportDeadBody RPC");
 
-        bool hasAnticheat = AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame && !Constants.IsVersionModded();
-        if (hasAnticheat)
+        if (Utilities.IsAnticheatPresent())
         {
              if (LobbyBehaviour.Instance != null)
             {
@@ -350,9 +351,8 @@ public class PlayersTab : ITab
 
     private static IEnumerator AttemptShapeshiftFrame(PlayerControl target)
     {
-        bool hasAnticheat = AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame && !Constants.IsVersionModded();
-
-         if (ShipStatus.Instance == null && hasAnticheat)
+        bool hasAnticheat = Utilities.IsAnticheatPresent();
+        if (ShipStatus.Instance == null && hasAnticheat)
         {
             MalumMenu.notifications.Send("Framer", "The game must have started for this option to work.");
             yield break;

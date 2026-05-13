@@ -8,8 +8,6 @@ namespace MalumMenu.anticheat.rpc
 	{
 		public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
 		{
-			if(!AmongUsClient.Instance.AmHost) return;
-
 			Vector2 position = NetHelpers.ReadVector2(reader);
 			// ushort seqId = reader.ReadUInt16();
 
