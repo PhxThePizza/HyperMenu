@@ -99,5 +99,15 @@ namespace MalumMenu
                 return (MapNames)GameOptionsManager.Instance.CurrentGameOptions.MapId;
             }
         }
+        public static bool IsAnticheatPresent()
+        {
+            if (Constants.IsVersionModded() || PlayerControl.LocalPlayer == null || PlayerControl.LocalPlayer.Data == null) return false;
+
+            // On freeplay, local, and modded lobbies, NetworkedPlayerInfo net objects are owned by the host (-2)
+            // On vanilla lobbies, NetworkedPlayerInfo net objects are owned by the backend among us servers (-4)
+            // If our NetworkedPlayerInfo net object is owned by the host, we can assume that the lobby has a lax anticheat without server authority
+            // which does not require us to use any sort of bypasses
+            return PlayerControl.LocalPlayer.Data.OwnerId == -4;
+        }
     }
 }
