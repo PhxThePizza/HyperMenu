@@ -53,7 +53,7 @@ public class ChatTab : ITab
     private void DrawColorSettings()
     {
         GUILayout.Label("Chat Color", GUIStylePreset.TabSubtitle);
-
+        CheatToggles.colorAsPlayer = GUILayout.Toggle(CheatToggles.colorAsPlayer, " Chat messages colored as the player who sent them");
         CheatToggles.changeChatColor = GUILayout.Toggle(CheatToggles.changeChatColor, " Enable Custom Chat Color");
         GUILayout.Space(5);
         GUILayout.BeginHorizontal();
