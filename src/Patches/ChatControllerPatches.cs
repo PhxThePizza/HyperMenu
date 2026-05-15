@@ -12,11 +12,39 @@ namespace MalumMenu;
 public static class ChatColorGlobalPatch
 {
     [HarmonyPriority(Priority.High)]
-    public static void Prefix(ref string chatText)
+    public static void Prefix(PlayerControl sourcePlayer, ref string chatText)
     {
+        // 1. CONFLICT RESOLVER: If both are on, turn both off.
+        if (CheatToggles.changeChatColor && CheatToggles.colorAsPlayer)
+        {
+            CheatToggles.changeChatColor = false;
+            CheatToggles.colorAsPlayer = false;
+            return;
+        }
+
+        // 2. MODE: Static Menu Color
         if (CheatToggles.changeChatColor && !string.IsNullOrEmpty(MalumMenu.menuChatColor.Value))
         {
             chatText = $"<color={MalumMenu.menuChatColor.Value}>{chatText}</color>";
+        }
+        
+        // 3. MODE: Color as Player (Dynamic)
+        else if (CheatToggles.colorAsPlayer && sourcePlayer != null && sourcePlayer.Data != null)
+        {
+            // In many versions, ColorId is inside DefaultOutfit
+            // Use null checks to ensure we don't crash if an outfit isn't loaded yet
+            if (sourcePlayer.Data.DefaultOutfit != null)
+            {
+                int colorId = sourcePlayer.Data.DefaultOutfit.ColorId;
+
+                // Ensure the ID is within the bounds of the Palette array
+                if (colorId >= 0 && colorId < Palette.PlayerColors.Length)
+                {
+                    Color pColor = Palette.PlayerColors[colorId];
+                    string hex = $"#{ColorUtility.ToHtmlStringRGB(pColor)}";
+                    chatText = $"<color={hex}>{chatText}</color>";
+                }
+            }
         }
     }
 }

@@ -70,6 +70,7 @@ public struct CheatToggles
 
     // Chat
     public static bool changeChatColor;
+    public static bool colorAsPlayer;
     public static bool enableChat;
     public static bool unlockCharacters;
     public static bool bypassUrlBlock;
