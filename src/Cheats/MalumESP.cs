@@ -117,6 +117,17 @@ public static class MalumESP
         try
         {
             playerPhysics.myPlayer.cosmetics.SetName(Utils.GetNameTag(playerPhysics.myPlayer.Data, playerPhysics.myPlayer.CurrentOutfit.PlayerName));
+
+            if (CheatToggles.ventIndicator && playerPhysics.myPlayer.inVent)
+            {
+                playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
+            }
+            else if (!playerPhysics.myPlayer.inVent)
+            {
+                // Unnecessary to revert nameText active state because base game handles it when exiting vents, but just in case:
+                playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
+            }
+
             // Move the nameText up to prevent it overlapping with colorblind text
             if (CheatToggles.seeRoles && CheatToggles.seePlayerInfo)
             {

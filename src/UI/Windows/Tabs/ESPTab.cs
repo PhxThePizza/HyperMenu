@@ -45,6 +45,10 @@ public class ESPTab : ITab
 
         CheatToggles.taskArrows = GUILayout.Toggle(CheatToggles.taskArrows, " Task Arrows");
 
+        CheatToggles.ventIndicator = GUILayout.Toggle(CheatToggles.ventIndicator, " Vent Indicator");
+
+        CheatToggles.seeDisguises = GUILayout.Toggle(CheatToggles.seeDisguises, " See Disguises");
+
         CheatToggles.revealVotes = GUILayout.Toggle(CheatToggles.revealVotes, " Reveal Votes");
 
         CheatToggles.seeLobbyInfo = GUILayout.Toggle(CheatToggles.seeLobbyInfo, " See Lobby Info");
