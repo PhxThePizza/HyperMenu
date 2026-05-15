@@ -44,6 +44,11 @@ public static class ChatController_AddChat
 			{
 				chatText = BlockedWords.CensorWords(chatText, false);
 			}
+			
+			if(CheatToggles.changeChatColor && !string.IsNullOrEmpty(MalumMenu.menuChatColor.Value))
+			{
+				chatText = $"<color={MalumMenu.menuChatColor.Value}>{chatText}</color>";
+			}
 			pooledBubble.SetText(chatText);
 			pooledBubble.AlignChildren();
 			__instance.AlignAllBubbles();
