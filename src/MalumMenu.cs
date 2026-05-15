@@ -46,6 +46,7 @@ public partial class MalumMenu : BasePlugin
 
     public static ConfigEntry<string> menuKeybind;
     public static ConfigEntry<string> menuHtmlColor;
+    public static ConfigEntry<string> menuChatColor;
     public static ConfigEntry<bool> menuOpenOnMouse;
     public static ConfigEntry<bool> menuKeepSubwindowsOpen;
     public static ConfigEntry<string> spoofLevel;
@@ -75,7 +76,6 @@ public partial class MalumMenu : BasePlugin
         notifications = AddComponent<NotificationManager>();
         routines = AddComponent<RoutineManager>();
 
-
         // Loads config settings
         menuKeybind = Config.Bind("MalumMenu.GUI",
                                 "Keybind",
@@ -86,6 +86,11 @@ public partial class MalumMenu : BasePlugin
                                 "Color",
                                 "",
                                 "A custom color for your MalumMenu GUI. Supports html color codes");
+
+        menuChatColor = Config.Bind("MalumMenu.GUI",
+                                "ChatColor",
+                                "",
+                                "A custom HTML color code for your in-game chat messages. Supports html color codes");
 
         menuOpenOnMouse = Config.Bind("MalumMenu.GUI",
                                 "OpenOnMouse",

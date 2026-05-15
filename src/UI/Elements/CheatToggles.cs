@@ -69,6 +69,8 @@ public struct CheatToggles
     public static bool distanceBasedTracers;
 
     // Chat
+    public static bool changeChatColor;
+    public static bool colorAsPlayer;
     public static bool enableChat;
     public static bool unlockCharacters;
     public static bool bypassUrlBlock;
