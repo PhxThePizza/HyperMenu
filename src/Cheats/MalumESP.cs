@@ -120,32 +120,68 @@ public static class MalumESP
 
             if (CheatToggles.ventIndicator && playerPhysics.myPlayer.inVent)
             {
-                playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
-                playerPhysics.myPlayer.cosmetics.nameText.enabled = true;
+                if (playerPhysics.myPlayer.Collider != null) playerPhysics.myPlayer.Collider.enabled = false;
+
+                // Force cosmetics game object to be active so all child renderers are visible
+                if (playerPhysics.myPlayer.cosmetics != null)
+                {
+                    playerPhysics.myPlayer.cosmetics.gameObject.SetActive(true);
+                }
+
+                foreach (var spriteRenderer in playerPhysics.myPlayer.GetComponentsInChildren<SpriteRenderer>(true))
+                {
+                    spriteRenderer.enabled = true;
+                    spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 0.35f);
+                }
+
+                // Show and position the nametag above the hologram
+                if (playerPhysics.myPlayer.cosmetics != null && playerPhysics.myPlayer.cosmetics.nameText != null)
+                {
+                    playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
+                    playerPhysics.myPlayer.cosmetics.nameText.enabled = true;
+                    playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+                }
                 if (playerPhysics.myPlayer.cosmetics.colorBlindText != null)
                 {
                     playerPhysics.myPlayer.cosmetics.colorBlindText.gameObject.SetActive(true);
                     playerPhysics.myPlayer.cosmetics.colorBlindText.enabled = true;
                 }
             }
-            else if (!playerPhysics.myPlayer.inVent)
+            else if (!playerPhysics.myPlayer.inVent && !playerPhysics.myPlayer.Data.IsDead)
             {
-                // Unnecessary to revert nameText active state because base game handles it when exiting vents, but just in case:
-                playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
+                if (playerPhysics.myPlayer.Collider != null) playerPhysics.myPlayer.Collider.enabled = true;
+
+                // Restore full opacity for any sprites that were at 35%
+                foreach (var spriteRenderer in playerPhysics.myPlayer.GetComponentsInChildren<SpriteRenderer>(true))
+                {
+                    if (Mathf.Approximately(spriteRenderer.color.a, 0.35f))
+                    {
+                        spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1f);
+                    }
+                }
+
+                // Restore nametag position
+                if (playerPhysics.myPlayer.cosmetics != null && playerPhysics.myPlayer.cosmetics.nameText != null)
+                {
+                    playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
+                }
             }
 
-            // Move the nameText up to prevent it overlapping with colorblind text
-            if (CheatToggles.seeRoles && CheatToggles.seePlayerInfo)
+            // Move the nameText up to prevent it overlapping with colorblind text (but not if in vent)
+            if (!playerPhysics.myPlayer.inVent)
             {
-                playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.186f, 0f);
-            }
-            else if (CheatToggles.seeRoles || CheatToggles.seePlayerInfo)
-            {
-                playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.093f, 0f);
-            }
-            else
-            {
-                playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0f, 0f);
+                if (CheatToggles.seeRoles && CheatToggles.seePlayerInfo)
+                {
+                    playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.186f, 0f);
+                }
+                else if (CheatToggles.seeRoles || CheatToggles.seePlayerInfo)
+                {
+                    playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.093f, 0f);
+                }
+                else
+                {
+                    playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0f, 0f);
+                }
             }
         } catch { }
     }
