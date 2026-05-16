@@ -45,11 +45,20 @@ public class ESPTab : ITab
 
         CheatToggles.taskArrows = GUILayout.Toggle(CheatToggles.taskArrows, " Task Arrows");
 
-        CheatToggles.ventIndicator = GUILayout.Toggle(CheatToggles.ventIndicator, " Vent Indicator");
-
         CheatToggles.revealVotes = GUILayout.Toggle(CheatToggles.revealVotes, " Reveal Votes");
 
         CheatToggles.seeLobbyInfo = GUILayout.Toggle(CheatToggles.seeLobbyInfo, " See Lobby Info");
+
+        GUILayout.Label(" See Vented Players");
+
+        GUILayout.BeginHorizontal();
+
+        CheatToggles.ventPlayerOpacity = Mathf.RoundToInt(GUILayout.HorizontalSlider(CheatToggles.ventPlayerOpacity, 0f, 100f, GUILayout.Width(250f)));
+
+        GUILayout.Label(CheatToggles.ventPlayerOpacity == 0f ? " Off" : $" {Mathf.RoundToInt(CheatToggles.ventPlayerOpacity)}%");
+
+        GUILayout.EndHorizontal();
+
     }
 
     private void DrawCamera()
