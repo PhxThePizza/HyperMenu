@@ -43,7 +43,6 @@ public struct CheatToggles
     public static bool seeGhosts;
     public static bool seeRoles;
     public static bool seePlayerInfo;
-    public static bool seeDisguises;
     public static bool taskArrows;
     public static bool ventIndicator;
     public static bool trackImps;
