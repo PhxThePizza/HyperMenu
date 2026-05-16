@@ -121,8 +121,12 @@ public static class MalumESP
             if (CheatToggles.ventIndicator && playerPhysics.myPlayer.inVent)
             {
                 playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
+                playerPhysics.myPlayer.cosmetics.nameText.enabled = true;
                 if (playerPhysics.myPlayer.cosmetics.colorBlindText != null)
+                {
                     playerPhysics.myPlayer.cosmetics.colorBlindText.gameObject.SetActive(true);
+                    playerPhysics.myPlayer.cosmetics.colorBlindText.enabled = true;
+                }
             }
             else if (!playerPhysics.myPlayer.inVent)
             {
