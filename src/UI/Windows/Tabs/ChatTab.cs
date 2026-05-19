@@ -7,9 +7,16 @@ public class ChatTab : ITab
     public string name => "Chat";
 
     private TextField _chatColorField;
+    private bool _initialized = false;
 
     public void Draw()
     {
+        if (!_initialized)
+        {
+            Initialize();
+            _initialized = true;
+        }
+
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
         DrawGeneral();
