@@ -84,6 +84,7 @@ public struct CheatToggles
     public static bool unfixableLights;
     public static bool callMeeting;
     public static bool reportBody;
+    public static bool autoReportBodies;
     public static bool kickOffensiveNames;
     public static bool fakeTasks;
     public static bool doAnyTask;
