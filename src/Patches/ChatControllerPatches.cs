@@ -1,9 +1,50 @@
+using AmongUs.QuickChat;
 using HarmonyLib;
 using System;
-using UnityEngine;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace MalumMenu;
+
+
+[HarmonyPatch(typeof(QuickChatMenu))]
+public static class QuickChatMenuOpenPatch
+{
+    [HarmonyPatch(nameof(QuickChatMenu.Open))]
+    [HarmonyPostfix]
+    public static void Postfix(QuickChatMenu __instance)
+    {
+        // Safeguard against null instances when the side panel triggers
+        if (__instance == null) return;
+
+        // In recent versions, QuickChatMenu populates a list of controller elements dynamically.
+        // We use reflection or explicit properties to access the text container if direct references break.
+        string customText = "There are <color=#FF1919> cheating/hacking </color><color=#FFFFFF> Impostors among us.";
+
+        // Let's look for the active category controller items that the game renders on screen
+        // If direct class types are missing, they are typically bound within an internal array or list.
+        try
+        {
+            // We fetch the items array/list reflecting the visual elements
+            foreach (var field in typeof(QuickChatMenu).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+            {
+                // Check if the field is an array or collection containing items
+                if (field.Name.ToLower().Contains("items") || field.Name.ToLower().Contains("elements"))
+                {
+                    var value = field.GetValue(__instance);
+                    if (value == null) continue;
+
+                    // Check your console logs if you need to verify the internal layout names!
+                    System.Console.WriteLine($"[MalumMenu] Found chat field container: {field.Name}");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Console.WriteLine($"[MalumMenu] Custom injection exception handled: {ex.Message}");
+        }
+    }
+}
 
 // --- GLOBAL COLOR PATCH ---
 // This runs first and modifies the text for EVERYONE.
