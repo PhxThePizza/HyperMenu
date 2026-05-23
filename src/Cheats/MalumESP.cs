@@ -117,32 +117,35 @@ public static class MalumESP
     {
         try
         {
-            if (playerPhysics.myPlayer.cosmetics != null)
+            var player = playerPhysics.myPlayer;
+            if (player == null) return;
+
+            if (player.cosmetics != null)
             {
-                playerPhysics.myPlayer.cosmetics.SetName(Utils.GetNameTag(playerPhysics.myPlayer.Data, playerPhysics.myPlayer.CurrentOutfit.PlayerName));
+                player.cosmetics.SetName(Utils.GetNameTag(player.Data, player.CurrentOutfit.PlayerName));
             }
 
             float ventOpacity = Mathf.Clamp(CheatToggles.ventPlayerOpacity, 0f, 100f) / 100f;
 
-            if (!playerPhysics.myPlayer.inVent || ventOpacity <= 0f)
+            if (!player.inVent || ventOpacity <= 0f)
             {
-                if (!playerPhysics.myPlayer.inVent && !playerPhysics.myPlayer.Data.IsDead)
+                if (!player.inVent && !player.Data.IsDead)
                 {
-                    RestoreVentAppearance(playerPhysics.myPlayer);
+                    RestoreVentAppearance(player);
 
-                    if (playerPhysics.myPlayer.cosmetics != null && playerPhysics.myPlayer.cosmetics.nameText != null)
+                    if (player.cosmetics != null && player.cosmetics.nameText != null)
                     {
                         if (CheatToggles.seeRoles && CheatToggles.seePlayerInfo)
                         {
-                            playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.186f, 0f);
+                            player.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.186f, 0f);
                         }
                         else if (CheatToggles.seeRoles || CheatToggles.seePlayerInfo)
                         {
-                            playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.093f, 0f);
+                            player.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0.093f, 0f);
                         }
                         else
                         {
-                            playerPhysics.myPlayer.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0f, 0f);
+                            player.cosmetics.nameText.transform.localPosition = new Vector3(0f, 0f, 0f);
                         }
                     }
                 }
@@ -150,28 +153,31 @@ public static class MalumESP
                 return;
             }
 
-            // Show with opacity
-            if (playerPhysics.myPlayer.Collider != null) playerPhysics.myPlayer.Collider.enabled = false;
+            // Keep the player visible while the vented state is rendered locally.
+            player.Visible = true;
 
-            if (playerPhysics.myPlayer.cosmetics != null)
+            // The collider stays disabled so vent movement and interactions continue to behave normally.
+            if (player.Collider != null) player.Collider.enabled = false;
+
+            if (player.cosmetics != null)
             {
-                playerPhysics.myPlayer.cosmetics.gameObject.SetActive(true);
+                player.cosmetics.gameObject.SetActive(true);
             }
 
-            // Apply opacity to all renderers so hats, pets, and body cosmetics stay visible too.
-            ApplyVentOpacity(playerPhysics.myPlayer, ventOpacity);
+            // Apply the configured opacity to the cosmetic layer so body parts, hats, and pets share the same fade.
+            ApplyVentOpacity(player, ventOpacity);
 
             // Show nametag
-            if (playerPhysics.myPlayer.cosmetics?.nameText != null)
+            if (player.cosmetics?.nameText != null)
             {
-                playerPhysics.myPlayer.cosmetics.nameText.gameObject.SetActive(true);
-                playerPhysics.myPlayer.cosmetics.nameText.enabled = true;
+                player.cosmetics.nameText.gameObject.SetActive(true);
+                player.cosmetics.nameText.enabled = true;
             }
 
-            if (playerPhysics.myPlayer.cosmetics?.colorBlindText != null)
+            if (player.cosmetics?.colorBlindText != null)
             {
-                playerPhysics.myPlayer.cosmetics.colorBlindText.gameObject.SetActive(true);
-                playerPhysics.myPlayer.cosmetics.colorBlindText.enabled = true;
+                player.cosmetics.colorBlindText.gameObject.SetActive(true);
+                player.cosmetics.colorBlindText.enabled = true;
             }
         } catch { }
     }
@@ -187,11 +193,8 @@ public static class MalumESP
             player.cosmetics.gameObject.SetActive(true);
         }
 
-        foreach (var renderer in player.GetComponentsInChildren<Renderer>(true))
+        foreach (var renderer in GetVentCosmeticRenderers(player))
         {
-            // Make sure the renderer's GameObject is active so enabling the renderer actually displays it
-            try { renderer.gameObject.SetActive(true); } catch { }
-
             renderer.enabled = true;
 
             if (renderer is SpriteRenderer spriteRenderer)
@@ -229,17 +232,9 @@ public static class MalumESP
     {
         if (player == null) return;
 
-        foreach (var renderer in player.GetComponentsInChildren<Renderer>(true))
+        foreach (var renderer in GetVentCosmeticRenderers(player))
         {
-            var name = renderer.gameObject.name;
-            if (name.IndexOf("arrow", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                name.IndexOf("task", System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                renderer.enabled = true;
-                continue;
-            }
-
-            // Ensure the renderer's GameObject is active so hats/pets (which may be disabled) become visible
+            // Keep the cosmetic object active so version-specific hat and pet renderers can be shown again.
             try { renderer.gameObject.SetActive(true); } catch { }
 
             renderer.enabled = true;
@@ -255,6 +250,46 @@ public static class MalumESP
                 renderer.material.color = color;
             }
         }
+    }
+
+    private static IEnumerable<Renderer> GetVentCosmeticRenderers(PlayerControl player)
+    {
+        if (player == null) yield break;
+
+        if (player.cosmetics != null && player.cosmetics.transform != null)
+        {
+            foreach (var renderer in player.cosmetics.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer != null)
+                {
+                    yield return renderer;
+                }
+            }
+
+            yield break;
+        }
+
+        foreach (var renderer in player.GetComponentsInChildren<Renderer>(true))
+        {
+            if (renderer == null) continue;
+
+            if (IsSafeFallbackRenderer(renderer))
+            {
+                yield return renderer;
+            }
+        }
+    }
+
+    private static bool IsSafeFallbackRenderer(Renderer renderer)
+    {
+        if (renderer == null) return false;
+
+        var name = renderer.gameObject.name;
+        return name.IndexOf("camera", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+               name.IndexOf("canvas", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+               name.IndexOf("screen", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+               name.IndexOf("rendertexture", System.StringComparison.OrdinalIgnoreCase) < 0 &&
+               name.IndexOf("ui", System.StringComparison.OrdinalIgnoreCase) < 0;
     }
 
     public static void ChatNametags(ChatBubble chatBubble)
