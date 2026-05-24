@@ -140,6 +140,10 @@ public static class MalumESP
             player.cosmetics.SetName(Utils.GetNameTag(player.Data, player.CurrentOutfit.PlayerName));
         }
 
+        // The vent visibility feature should only affect remote players.
+        // Touching local vent rendering can interfere with vent travel controls.
+        if (player.AmOwner) return;
+
         float ventOpacity = Mathf.Clamp(CheatToggles.ventPlayerOpacity, 0f, 100f) / 100f;
 
         if (!player.inVent || ventOpacity <= 0f)
