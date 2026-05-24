@@ -267,17 +267,6 @@ public struct CheatToggles
             line = line.Trim();
             if (line.StartsWith("#")) continue;
 
-            // Special-case legacy vent visibility settings and slider values
-            if (line.StartsWith("ventIndicator", System.StringComparison.OrdinalIgnoreCase))
-            {
-                var legacyParts = line.Split('=', 3);
-                if (legacyParts.Length >= 2 && bool.TryParse(legacyParts[1].Trim(), out var legacyEnabled))
-                {
-                    ventPlayerOpacity = legacyEnabled ? 35f : 0f;
-                }
-
-                continue;
-            }
 
             if (line.StartsWith("ventPlayerOpacity", System.StringComparison.OrdinalIgnoreCase))
             {

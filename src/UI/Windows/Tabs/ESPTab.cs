@@ -53,9 +53,11 @@ public class ESPTab : ITab
 
         GUILayout.BeginHorizontal();
 
-        CheatToggles.ventPlayerOpacity = Mathf.RoundToInt(GUILayout.HorizontalSlider(CheatToggles.ventPlayerOpacity, 0f, 100f, GUILayout.Width(250f)));
+        CheatToggles.ventPlayerOpacity = GUILayout.HorizontalSlider(CheatToggles.ventPlayerOpacity, 0f, 100f, GUILayout.Width(250f));
 
         GUILayout.Label(CheatToggles.ventPlayerOpacity == 0f ? " Off" : $" {Mathf.RoundToInt(CheatToggles.ventPlayerOpacity)}%");
+
+        MalumESP.RefreshVentOpacity();
 
         GUILayout.EndHorizontal();
 
