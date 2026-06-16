@@ -1,5 +1,6 @@
 using HarmonyLib;
 using UnityEngine;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 
 namespace MalumMenu;
 
@@ -43,8 +44,8 @@ public static class Vent_EnterVent
     {
         // If disableVents is enabled, force-kick all players from vents when someone enters
         if (CheatToggles.disableVents)
-        {
-            DestroyableSingleton<HudManager>.Instance.StartCoroutine(MalumCheats.KickVentsAfterDelay(0.5f));
+            {
+                DestroyableSingleton<HudManager>.Instance.StartCoroutine(MalumCheats.KickVentsAfterDelay(0.5f).WrapToIl2Cpp());
         }
 
         if (!CheatToggles.logVents || !Utils.isShip) return;

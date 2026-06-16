@@ -119,7 +119,7 @@ namespace MalumMenu
 
                 // Mira has no closable doors
                 case MapNames.MiraHQ:
-                    return [];
+                    return new Dictionary<string, SystemTypes>();
 
                 case MapNames.Polus:
                     return polusDoors;

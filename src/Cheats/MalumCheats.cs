@@ -13,6 +13,10 @@ public static class MalumCheats
     private static bool _isScanAnimActive;
     private static bool _isCamsAnimActive;
 
+    // For temporary task injection logic
+    private static readonly HashSet<NormalPlayerTask> _injectedTasks = new();
+    private static readonly Dictionary<NormalPlayerTask, PlayerControl> _originalOwners = new();
+
     public static bool isServerInMeeting = false;
 
     public static void OpenMeetingCheat()
