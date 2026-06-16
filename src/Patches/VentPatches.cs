@@ -44,7 +44,7 @@ public static class Vent_EnterVent
         // If disableVents is enabled, force-kick all players from vents when someone enters
         if (CheatToggles.disableVents)
         {
-            MalumCheats.ForceKickVents();
+            DestroyableSingleton<HudManager>.Instance.StartCoroutine(MalumCheats.KickVentsAfterDelay(0.5f));
         }
 
         if (!CheatToggles.logVents || !Utils.isShip) return;

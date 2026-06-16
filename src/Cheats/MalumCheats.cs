@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Collections;
 using AmongUs.GameOptions;
 using AmongUs.InnerNet.GameDataMessages;
 using UnityEngine;
@@ -282,6 +283,12 @@ public static class MalumCheats
         {
             VentilationSystem.Update(VentilationSystem.Operation.BootImpostors, vent.Id);
         }
+    }
+
+    public static IEnumerator KickVentsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ForceKickVents();
     }
 
     public static void KillAllCheat()
