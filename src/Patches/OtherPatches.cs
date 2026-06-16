@@ -7,6 +7,8 @@ using System;
 using System.Security.Cryptography;
 using InnerNet;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace MalumMenu;
 
@@ -450,10 +452,17 @@ public static class IGameOptionsExtensions_GetAdjustedNumImpostors
     }
 }
 
-[HarmonyPatch(typeof(PlayerPurchasesData), nameof(PlayerPurchasesData.GetPurchase))]
+[HarmonyPatch]
 public static class PlayerPurchasesData_GetPurchase
 {
-    // Postfix patch of PlayerPurchasesData.GetPurchase to unlock all cosmetics
+    // Postfix patch of PlayerPurchasesData purchase checks to unlock all cosmetics
+    public static IEnumerable<MethodBase> TargetMethods()
+    {
+        return AccessTools.GetDeclaredMethods(typeof(PlayerPurchasesData))
+            .Where(method => method.ReturnType == typeof(bool) &&
+                             method.Name.IndexOf("Purchase", StringComparison.OrdinalIgnoreCase) >= 0);
+    }
+
     public static void Postfix(ref bool __result)
     {
         if (!CheatToggles.freeCosmetics) return;

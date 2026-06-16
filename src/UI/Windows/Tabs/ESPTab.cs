@@ -50,11 +50,18 @@ public class ESPTab : ITab
 
         CheatToggles.seeLobbyInfo = GUILayout.Toggle(CheatToggles.seeLobbyInfo, " See Lobby Info");
 
-        Visuals.SkipShhhAnimation.Enabled = GUILayout.Toggle(Visuals.SkipShhhAnimation.Enabled, "Skip Shhh Animation");
+        GUILayout.Label(" See Vented Players");
 
-        Visuals.AccurateDisconnectReasons.Enabled = GUILayout.Toggle(Visuals.AccurateDisconnectReasons.Enabled, "Use more accurate disconnection reasons");
+        GUILayout.BeginHorizontal();
 
-        Visuals.ShowProtections.Enabled = GUILayout.Toggle(Visuals.ShowProtections.Enabled, "Show Guardian Angel Protections");
+        CheatToggles.ventPlayerOpacity = GUILayout.HorizontalSlider(CheatToggles.ventPlayerOpacity, 0f, 100f, GUILayout.Width(250f));
+
+        GUILayout.Label(CheatToggles.ventPlayerOpacity == 0f ? " Off" : $" {Mathf.RoundToInt(CheatToggles.ventPlayerOpacity)}%");
+
+        MalumESP.RefreshVentOpacity();
+
+        GUILayout.EndHorizontal();
+
     }
 
     private void DrawCamera()
