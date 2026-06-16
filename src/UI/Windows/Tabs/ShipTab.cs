@@ -46,7 +46,7 @@ public class ShipTab : ITab
 
         CheatToggles.closeMeeting = GUILayout.Toggle(CheatToggles.closeMeeting, " Close Meeting");
 
-        CheatToggles.autoReportBodies = GUILayout.Toggle(CheatToggles.autoReportBodies, " Auto-Report Dead Bodies");
+        CheatToggles.openMeeting = GUILayout.Toggle(CheatToggles.openMeeting, " Open Meeting");
 
         CheatToggles.autoOpenDoorsOnUse = GUILayout.Toggle(CheatToggles.autoOpenDoorsOnUse, " Auto-Open Doors On Use");
 
