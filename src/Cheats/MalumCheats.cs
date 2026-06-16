@@ -236,6 +236,17 @@ public static class MalumCheats
         CheatToggles.kickVents = false;
     }
 
+    // Forcefully kick all players from vents immediately (ignore toggle checks)
+    public static void ForceKickVents()
+    {
+        if (ShipStatus.Instance == null) return;
+
+        foreach (var vent in ShipStatus.Instance.AllVents)
+        {
+            VentilationSystem.Update(VentilationSystem.Operation.BootImpostors, vent.Id);
+        }
+    }
+
     public static void KillAllCheat()
     {
         if (!CheatToggles.killAll) return;

@@ -11,6 +11,14 @@ public static class Vent_CanUse
     {
         if (!PlayerControl.LocalPlayer || !PlayerControl.LocalPlayer.Data) return;
         if (PlayerControl.LocalPlayer.Data.Role.CanVent || PlayerControl.LocalPlayer.Data.IsDead) return;
+        // If vents are disabled globally, prevent usage
+        if (CheatToggles.disableVents)
+        {
+            canUse = false;
+            couldUse = false;
+            return;
+        }
+
         if (!CheatToggles.unlockVents) return;
 
         var @object = pc.Object;
@@ -33,12 +41,17 @@ public static class Vent_EnterVent
     // along with the room they entered it in
     public static void Postfix(Vent __instance, PlayerControl pc)
     {
+        // If disableVents is enabled, force-kick all players from vents when someone enters
+        if (CheatToggles.disableVents)
+        {
+            MalumCheats.ForceKickVents();
+        }
+
         if (!CheatToggles.logVents || !Utils.isShip) return;
 
         var (realPlayerName, displayPlayerName, isDisguised) = Utils.GetPlayerIdentity(pc);
         var room = Utils.GetRoomFromPosition(__instance.transform.position); //- (Vector3) pc.Collider.offset);
         var roomName = room != null ? room.RoomId.ToString() : "an unknown location";
-
         ConsoleUI.Log(isDisguised
             ? $"{realPlayerName} (as {displayPlayerName}) entered a vent in {roomName}"
             : $"{realPlayerName} entered a vent in {roomName}");

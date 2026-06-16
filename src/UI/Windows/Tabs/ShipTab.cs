@@ -67,6 +67,8 @@ public class ShipTab : ITab
     {
         GUILayout.Label("Vents", GUIStylePreset.TabSubtitle);
 
+        CheatToggles.disableVents = GUILayout.Toggle(CheatToggles.disableVents, " Disable Vents");
+
         CheatToggles.unlockVents = GUILayout.Toggle(CheatToggles.unlockVents, " Unlock Vents");
 
         CheatToggles.kickVents = GUILayout.Toggle(CheatToggles.kickVents, " Kick All From Vents");
