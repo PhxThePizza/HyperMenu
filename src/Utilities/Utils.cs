@@ -29,7 +29,7 @@ public static class Utils
     public static bool isLocalGame => AmongUsClient.Instance && AmongUsClient.Instance.NetworkMode == NetworkModes.LocalGame;
     public static bool isFreePlay => AmongUsClient.Instance && AmongUsClient.Instance.NetworkMode == NetworkModes.FreePlay;
     public static bool isPlayer => PlayerControl.LocalPlayer;
-    public static bool isHost => AmongUsClient.Instance && AmongUsClient.Instance.AmHost;
+    public static bool isHost => (AmongUsClient.Instance && AmongUsClient.Instance.AmHost) || CheatToggles.bypassHostOnly;
     public static bool isInGame => AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started && isPlayer;
     public static bool isMeeting => MeetingHud.Instance;
     public static bool isMeetingVoting => isMeeting && MeetingHud.Instance.state is MeetingHud.VoteStates.Voted or MeetingHud.VoteStates.NotVoted;
@@ -187,9 +187,14 @@ public static class Utils
 
     public static void CompleteTask(PlayerTask task)
     {
+        CompleteTask(PlayerControl.LocalPlayer, task);
+    }
+
+    public static void CompleteTask(PlayerControl player, PlayerTask task)
+    {
         if (isFreePlay)
         {
-            PlayerControl.LocalPlayer.RpcCompleteTask(task.Id);
+            player.RpcCompleteTask(task.Id);
             return;
         }
 
@@ -199,7 +204,7 @@ public static class Utils
         if (task.IsComplete) return;
         foreach (var item in PlayerControl.AllPlayerControls)
         {
-            var messageWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.CompleteTask, SendOption.Reliable, AmongUsClient.Instance.GetClientIdFromCharacter(item));
+            var messageWriter = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.CompleteTask, SendOption.Reliable, AmongUsClient.Instance.GetClientIdFromCharacter(item));
             messageWriter.WritePacked(task.Id);
             AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
         }
@@ -402,9 +407,12 @@ public static class Utils
         // Works for the tutorial
         if (isFreePlay)
         {
-            return (byte)AmongUsClient.Instance.TutorialMapId;
+            // If playing the tutorial
+            if (isFreePlay)
+            {
+                return (byte)AmongUsClient.Instance.TutorialMapId;
+            }
         }
-
         // Works for local / online games
         if (GameOptionsManager.Instance?.currentGameOptions != null)
         {
@@ -621,9 +629,8 @@ public static class Utils
     // Returns a random 1 - 12 characters long name
     public static string GetRandomName()
     {
-        var length = UnityEngine.Random.Range(1, 13);
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        return new string(Enumerable.Repeat(chars, length).Select(s => s[UnityEngine.Random.Range(0, s.Length)]).ToArray());
+        // Delegates to Among Us's built-in name randomizer.
+        return DestroyableSingleton<AccountManager>.Instance.GetRandomName();
     }
 
     // Returns current AmongUsClient ping in ms
@@ -781,6 +788,7 @@ public static class Utils
         UnityEngine.Object.Destroy(MalumMenu.doorsUI);
         UnityEngine.Object.Destroy(MalumMenu.tasksUI);
         UnityEngine.Object.Destroy(MalumMenu.protectUI);
+        UnityEngine.Object.Destroy(MalumMenu.streamerUI);
         // UnityEngine.Object.Destroy(MalumMenu.rolesUI);
 
         UnityEngine.Object.Destroy(MalumMenu.keybindListener);

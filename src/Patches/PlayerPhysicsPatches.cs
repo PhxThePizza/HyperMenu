@@ -20,6 +20,7 @@ public static class PlayerPhysics_LateUpdate
         MalumCheats.ForceStartGameCheat();
         MalumCheats.TeleportCursorCheat();
         MalumCheats.CompleteMyTasksCheat();
+        MalumCheats.CompleteAllTasksCheat();
         MalumCheats.PlayAnimationCheat();
         MalumCheats.PlayScannerCheat();
 
@@ -42,12 +43,21 @@ public static class PlayerPhysics_LateUpdate
         TracersHandler.DrawPlayerTracer(__instance);
 
         GameObject[] bodyObjects = GameObject.FindGameObjectsWithTag("DeadBody");
-        foreach(GameObject bodyObject in bodyObjects) // Finds and loops through all dead bodies
+        foreach (GameObject bodyObject in bodyObjects) // Finds and loops through all dead bodies
         {
             DeadBody deadBody = bodyObject.GetComponent<DeadBody>();
+            if (!deadBody) continue;
 
-            if (!deadBody || deadBody.Reported) continue;  // Only draw tracers for unreported dead bodies
             TracersHandler.DrawBodyTracer(deadBody);
+
+            if (CheatToggles.autoReportBodies)
+            {
+                if (deadBody.Reported) continue;
+
+                deadBody.Reported = true;
+
+                PlayerControl.LocalPlayer.CmdReportDeadBody(GameData.Instance.GetPlayerById(deadBody.ParentId));
+            }
         }
 
         try

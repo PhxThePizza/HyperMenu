@@ -6,8 +6,17 @@ public class ChatTab : ITab
 {
     public string name => "Chat";
 
+    private TextField _chatColorField;
+    private bool _initialized = false;
+
     public void Draw()
     {
+        if (!_initialized)
+        {
+            Initialize();
+            _initialized = true;
+        }
+
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
         DrawGeneral();
@@ -16,7 +25,16 @@ public class ChatTab : ITab
 
         DrawTextbox();
 
+        GUILayout.Space(15);
+
+        DrawColorSettings();
+
         GUILayout.EndVertical();
+    }
+
+    public void Initialize()
+    {
+        _chatColorField = new TextField(MalumMenu.menuChatColor.Value);
     }
 
     private void DrawGeneral()
@@ -37,5 +55,21 @@ public class ChatTab : ITab
         CheatToggles.longerMessages = GUILayout.Toggle(CheatToggles.longerMessages, " Allow Longer Messages");
 
         CheatToggles.unlockClipboard = GUILayout.Toggle(CheatToggles.unlockClipboard, " Unlock Clipboard");
+    }
+
+    private void DrawColorSettings()
+    {
+        GUILayout.Label("Chat Color", GUIStylePreset.TabSubtitle);
+        CheatToggles.colorAsPlayer = GUILayout.Toggle(CheatToggles.colorAsPlayer, " Chat messages colored as the player who sent them");
+        CheatToggles.changeChatColor = GUILayout.Toggle(CheatToggles.changeChatColor, " Enable Custom Chat Color");
+        GUILayout.Space(5);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Chat HTML Color:", GUILayout.Width(150));
+        _chatColorField.Draw(150);
+        if (GUILayout.Button("Save", GUILayout.Width(100)))
+        {
+            MalumMenu.menuChatColor.Value = _chatColorField.Content;
+        }
+        GUILayout.EndHorizontal();
     }
 }

@@ -31,15 +31,26 @@ public class ShipTab : ITab
 
     private void DrawGeneral()
     {
-        CheatToggles.unfixableLights = GUILayout.Toggle(CheatToggles.unfixableLights, " Unfixable Lights");
+        // Will implement this later, currently gets user kicked by AC. -ADHyperActive
+        // CheatToggles.completeAllTasks = GUILayout.Toggle(CheatToggles.completeAllTasks, " Allow All Tasks");
+        
+        CheatToggles.fakeTasks = GUILayout.Toggle(CheatToggles.fakeTasks, " Fake Tasks");
 
-        // CheatToggles.reportBody = GUILayout.Toggle(CheatToggles.reportBody, " Report Body");
+        CheatToggles.doAnyTask = GUILayout.Toggle(CheatToggles.doAnyTask, " Do Any Task");
+
+        CheatToggles.unfixableLights = GUILayout.Toggle(CheatToggles.unfixableLights, " Unfixable Lights");
 
         CheatToggles.callMeeting = GUILayout.Toggle(CheatToggles.callMeeting, " Call Meeting");
 
+        CheatToggles.reportBody = GUILayout.Toggle(CheatToggles.reportBody, " Report Body");
+
         CheatToggles.closeMeeting = GUILayout.Toggle(CheatToggles.closeMeeting, " Close Meeting");
 
+        CheatToggles.autoReportBodies = GUILayout.Toggle(CheatToggles.autoReportBodies, " Auto-Report Dead Bodies");
+
         CheatToggles.autoOpenDoorsOnUse = GUILayout.Toggle(CheatToggles.autoOpenDoorsOnUse, " Auto-Open Doors On Use");
+
+        CheatToggles.kickOffensiveNames = GUILayout.Toggle(CheatToggles.kickOffensiveNames, " Kick Offensive Names");
     }
 
     private void DrawSabotage()

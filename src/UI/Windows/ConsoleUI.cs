@@ -14,6 +14,7 @@ public class ConsoleUI : MonoBehaviour
     private static Vector2 _scrollPosition = Vector2.zero;
     private static List<string> _logEntries = new();
     private const int MaxLogEntries = 300;
+    private static readonly string _logFilePath = $"HyperMenu/Logs/Console.{System.DateTime.Now:MM_dd_yyyy.HH_mm_ss}.log";
 
     private void Start()
     {
@@ -32,7 +33,9 @@ public class ConsoleUI : MonoBehaviour
 
         _logStyle ??= new GUIStyle(GUI.skin.label)
         {
-            fontSize = 16
+            fontSize = 14,
+            padding = new RectOffset { left = 4, right = 4, top = 2, bottom = 2 },
+            normal = { textColor = new Color(0.95f, 0.95f, 0.95f) }
         };
 
         UIHelpers.ApplyUIColor();
@@ -62,7 +65,7 @@ public class ConsoleUI : MonoBehaviour
             _logEntries.Clear();
         }
 
-        if (GUILayout.Button("Copy Log to Clipboard"))
+        if (GUILayout.Button("Copy to Clipboard", GUILayout.Height(30)))
         {
             GUIUtility.systemCopyBuffer = String.Join("\n", _logEntries.ToArray());
         }
@@ -80,6 +83,18 @@ public class ConsoleUI : MonoBehaviour
         }
 
         _logEntries.Add(message);
+
+        try
+        {
+            System.IO.File.AppendAllText(_logFilePath, message + "\n");
+        }
+        catch {
+            if (_logEntries.Count >= MaxLogEntries) // Limit the number of logs to keep memory usage in check
+            {
+                _logEntries.RemoveAt(0); // Remove the oldest log entry
+            }
+            _logEntries.Add("Error saving to log file.");
+        }
 
         // Scroll to the bottom
         _scrollPosition.y = float.MaxValue;

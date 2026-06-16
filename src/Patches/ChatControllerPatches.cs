@@ -1,69 +1,156 @@
+using AmongUs.QuickChat;
 using HarmonyLib;
 using System;
-using UnityEngine;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace MalumMenu;
 
+
+[HarmonyPatch(typeof(QuickChatMenu))]
+public static class QuickChatMenuOpenPatch
+{
+    [HarmonyPatch(nameof(QuickChatMenu.Open))]
+    [HarmonyPostfix]
+    public static void Postfix(QuickChatMenu __instance)
+    {
+        // Safeguard against null instances when the side panel triggers
+        if (__instance == null) return;
+
+        // In recent versions, QuickChatMenu populates a list of controller elements dynamically.
+        // We use reflection or explicit properties to access the text container if direct references break.
+        string customText = "There are <color=#FF1919> cheating/hacking </color><color=#FFFFFF> Impostors among us.";
+
+        // Let's look for the active category controller items that the game renders on screen
+        // If direct class types are missing, they are typically bound within an internal array or list.
+        try
+        {
+            // We fetch the items array/list reflecting the visual elements
+            foreach (var field in typeof(QuickChatMenu).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+            {
+                // Check if the field is an array or collection containing items
+                if (field.Name.ToLower().Contains("items") || field.Name.ToLower().Contains("elements"))
+                {
+                    var value = field.GetValue(__instance);
+                    if (value == null) continue;
+
+                    // Check your console logs if you need to verify the internal layout names!
+                    System.Console.WriteLine($"[MalumMenu] Found chat field container: {field.Name}");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Console.WriteLine($"[MalumMenu] Custom injection exception handled: {ex.Message}");
+        }
+    }
+}
+
+// --- GLOBAL COLOR PATCH ---
+// This runs first and modifies the text for EVERYONE.
+// Because it uses 'ref', the modified text is passed into your second patch automatically.
+[HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
+public static class ChatColorGlobalPatch
+{
+    [HarmonyPriority(Priority.High)]
+    public static void Prefix(PlayerControl sourcePlayer, ref string chatText)
+    {
+        // 1. CONFLICT RESOLVER: If both are on, turn both off.
+        if (CheatToggles.changeChatColor && CheatToggles.colorAsPlayer)
+        {
+            CheatToggles.changeChatColor = false;
+            CheatToggles.colorAsPlayer = false;
+            return;
+        }
+
+        // 2. MODE: Static Menu Color
+        if (CheatToggles.changeChatColor && !string.IsNullOrEmpty(MalumMenu.menuChatColor.Value))
+        {
+            chatText = $"<color={MalumMenu.menuChatColor.Value}>{chatText}</color>";
+        }
+        
+        // 3. MODE: Color as Player (Dynamic)
+        else if (CheatToggles.colorAsPlayer && sourcePlayer != null && sourcePlayer.Data != null)
+        {
+            // In many versions, ColorId is inside DefaultOutfit
+            // Use null checks to ensure we don't crash if an outfit isn't loaded yet
+            if (sourcePlayer.Data.DefaultOutfit != null)
+            {
+                int colorId = sourcePlayer.Data.DefaultOutfit.ColorId;
+
+                // Ensure the ID is within the bounds of the Palette array
+                if (colorId >= 0 && colorId < Palette.PlayerColors.Length)
+                {
+                    Color pColor = Palette.PlayerColors[colorId];
+                    string hex = $"#{ColorUtility.ToHtmlStringRGB(pColor)}";
+                    chatText = $"<color={hex}>{chatText}</color>";
+                }
+            }
+        }
+    }
+}
+
+// --- GHOST INTERCEPTION PATCH ---
+// Exactly as you provided, no changes made to the logic or naming.
 [HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
 public static class ChatController_AddChat
 {
-	// Prefix patch of ChatController.AddChat to receive ghost messages if CheatSettings.seeGhosts is enabled even if LocalPlayer is alive
-	// Basically does what the original method did with the required modifications
-	public static bool Prefix(PlayerControl sourcePlayer, string chatText, bool censor, ChatController __instance)
+    // Prefix patch of ChatController.AddChat to receive ghost messages if CheatSettings.seeGhosts is enabled even if LocalPlayer is alive
+    // Basically does what the original method did with the required modifications
+    public static bool Prefix(PlayerControl sourcePlayer, string chatText, bool censor, ChatController __instance)
     {
-		// Simply run original method if seeGhosts is disabled or LocalPlayer already dead
+        // Simply run original method if seeGhosts is disabled or LocalPlayer already dead
         if (!CheatToggles.seeGhosts || PlayerControl.LocalPlayer.Data.IsDead) return true;
 
         if (!sourcePlayer || !PlayerControl.LocalPlayer) return true;
 
-		NetworkedPlayerInfo data = PlayerControl.LocalPlayer.Data;
-		NetworkedPlayerInfo data2 = sourcePlayer.Data;
+        NetworkedPlayerInfo data = PlayerControl.LocalPlayer.Data;
+        NetworkedPlayerInfo data2 = sourcePlayer.Data;
 
-		if (data2 == null || data == null) return true; // Remove isDead check for LocalPlayer
+        if (data2 == null || data == null) return true; // Remove isDead check for LocalPlayer
 
-		ChatBubble pooledBubble = __instance.GetPooledBubble();
+        ChatBubble pooledBubble = __instance.GetPooledBubble();
 
-		try
-		{
-			pooledBubble.transform.SetParent(__instance.scroller.Inner);
-			pooledBubble.transform.localScale = Vector3.one;
-			bool flag = sourcePlayer == PlayerControl.LocalPlayer;
-			if (flag)
-			{
-				pooledBubble.SetRight();
-			}
-			else
-			{
-				pooledBubble.SetLeft();
-			}
-			bool didVote = MeetingHud.Instance && MeetingHud.Instance.DidVote(sourcePlayer.PlayerId);
-			pooledBubble.SetCosmetics(data2);
-			__instance.SetChatBubbleName(pooledBubble, data2, data2.IsDead, didVote, PlayerNameColor.Get(data2), null);
-			if (censor && AmongUs.Data.DataManager.Settings.Multiplayer.CensorChat)
-			{
-				chatText = BlockedWords.CensorWords(chatText, false);
-			}
-			pooledBubble.SetText(chatText);
-			pooledBubble.AlignChildren();
-			__instance.AlignAllBubbles();
-			if (!__instance.IsOpenOrOpening && __instance.notificationRoutine == null)
-			{
-				__instance.notificationRoutine = __instance.StartCoroutine(__instance.BounceDot());
-			}
-			if (!flag && !__instance.IsOpenOrOpening)
-			{
-				SoundManager.Instance.PlaySound(__instance.messageSound, false).pitch = 0.5f + sourcePlayer.PlayerId / 15f;
-				__instance.chatNotification.SetUp(sourcePlayer, chatText);
-			}
-		}
-		catch (Exception message)
-		{
-			ChatController.Logger.Error(message.ToString(), null);
-			__instance.chatBubblePool.Reclaim(pooledBubble);
-		}
+        try
+        {
+            pooledBubble.transform.SetParent(__instance.scroller.Inner);
+            pooledBubble.transform.localScale = Vector3.one;
+            bool flag = sourcePlayer == PlayerControl.LocalPlayer;
+            if (flag)
+            {
+                pooledBubble.SetRight();
+            }
+            else
+            {
+                pooledBubble.SetLeft();
+            }
+            bool didVote = MeetingHud.Instance && MeetingHud.Instance.DidVote(sourcePlayer.PlayerId);
+            pooledBubble.SetCosmetics(data2);
+            __instance.SetChatBubbleName(pooledBubble, data2, data2.IsDead, didVote, PlayerNameColor.Get(data2), null);
+            if (censor && AmongUs.Data.DataManager.Settings.Multiplayer.CensorChat)
+            {
+                chatText = BlockedWords.CensorWords(chatText, false);
+            }
+            pooledBubble.SetText(chatText);
+            pooledBubble.AlignChildren();
+            __instance.AlignAllBubbles();
+            if (!__instance.IsOpenOrOpening && __instance.notificationRoutine == null)
+            {
+                __instance.notificationRoutine = __instance.StartCoroutine(__instance.BounceDot());
+            }
+            if (!flag && !__instance.IsOpenOrOpening)
+            {
+                SoundManager.Instance.PlaySound(__instance.messageSound, false).pitch = 0.5f + sourcePlayer.PlayerId / 15f;
+                __instance.chatNotification.SetUp(sourcePlayer, chatText);
+            }
+        }
+        catch (Exception message)
+        {
+            ChatController.Logger.Error(message.ToString(), null);
+            __instance.chatBubblePool.Reclaim(pooledBubble);
+        }
 
-        return false; // Skips the original method completly
+        return false; // Skips the original method completely
     }
 }
 

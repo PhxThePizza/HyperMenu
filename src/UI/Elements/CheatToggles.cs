@@ -20,6 +20,7 @@ public struct CheatToggles
     public static bool noKillCd;
     public static bool showTasksMenu;
     public static bool completeMyTasks;
+    public static bool completeAllTasks;
     public static bool impostorTasks;
     public static bool killReach;
     public static bool killAnyone;
@@ -68,6 +69,8 @@ public struct CheatToggles
     public static bool distanceBasedTracers;
 
     // Chat
+    public static bool changeChatColor;
+    public static bool colorAsPlayer;
     public static bool enableChat;
     public static bool unlockCharacters;
     public static bool bypassUrlBlock;
@@ -81,6 +84,10 @@ public struct CheatToggles
     public static bool unfixableLights;
     public static bool callMeeting;
     public static bool reportBody;
+    public static bool autoReportBodies;
+    public static bool kickOffensiveNames;
+    public static bool fakeTasks;
+    public static bool doAnyTask;
 
     // Sabotage
     public static bool commsSab;
@@ -156,18 +163,22 @@ public struct CheatToggles
     public static bool killAll;
     public static bool killAllCrew;
     public static bool killAllImps;
+    public static bool bypassHostOnly;
 
     // Passive
+    public static bool antiOverload;
     public static bool unlockFeatures;
     public static bool freeCosmetics;
     public static bool avoidPenalties;
     public static bool copyLobbyCodeOnDisconnect;
     public static bool spoofAprilFoolsDate;
+    public static bool randomizeCosmetics;
 
     // Modes
     public static bool rgbMode;
     public static bool stealthMode;
     public static bool panicMode;
+    public static bool streamerMode;
 
     // Config
     public static bool reloadConfig;

@@ -12,6 +12,15 @@ public class HostOnlyTab : ITab
 
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
+        if (PlayerControl.LocalPlayer == null)
+        {
+            GUILayout.Label("You are not currently in a game, these options will not work.");
+        }
+        else if (!AmongUsClient.Instance.AmHost)
+        {
+            GUILayout.Label("You are not the host of the current lobby. Using these options will either do nothing or get you banned by the anticheat");
+        }
+
         DrawGeneral();
 
         GUILayout.Space(15);
@@ -35,6 +44,10 @@ public class HostOnlyTab : ITab
 
     private void DrawGeneral()
     {
+        CheatToggles.bypassHostOnly = GUILayout.Toggle(CheatToggles.bypassHostOnly, " Bypass Host Only");
+
+        GUILayout.Space(5);
+
         CheatToggles.killVanished = GUILayout.Toggle(CheatToggles.killVanished, " Kill While Vanished");
 
         CheatToggles.killAnyone = GUILayout.Toggle(CheatToggles.killAnyone, " Kill Anyone");

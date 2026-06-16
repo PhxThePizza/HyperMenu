@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using UnityEngine.SceneManagement;
@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using MalumMenu.features;
+using MalumMenu.routines;
+using MalumMenu.ui;
 
 namespace MalumMenu;
 
@@ -19,6 +22,7 @@ public partial class MalumMenu : BasePlugin
     public Harmony Harmony { get; } = new(Id);
     public static MalumMenu Plugin;
     public new static ManualLogSource Log;
+    public static MalumMenu Instance { get; private set; }
     public static readonly string ProfilePath = Path.Combine(Paths.ConfigPath, "MalumProfile.txt");
 
     public static MenuUI menuUI;
@@ -28,15 +32,21 @@ public partial class MalumMenu : BasePlugin
     public static DoorsUI doorsUI;
     public static TasksUI tasksUI;
     public static ProtectUI protectUI;
+    public static StreamerUI streamerUI;
     public static KeybindListener keybindListener;
 
     public static string malumVersion = "3.1.1";
+    public static string hyperVersion = "4.1.1";
+    public static string hyperBuild = "Stable";
     public static List<string> supportedAU = new List<string> { "2026.3.31" };
+    public static List<string> toleratedAU = new List<string> { "2026.2.24", "2026.3.17" };
     public static bool isPanicked = false;
     public static bool inStealthMode = false;
+    public static bool overloadFixed = true;
 
     public static ConfigEntry<string> menuKeybind;
     public static ConfigEntry<string> menuHtmlColor;
+    public static ConfigEntry<string> menuChatColor;
     public static ConfigEntry<bool> menuOpenOnMouse;
     public static ConfigEntry<bool> menuKeepSubwindowsOpen;
     public static ConfigEntry<string> spoofLevel;
@@ -54,10 +64,17 @@ public partial class MalumMenu : BasePlugin
     public static ConfigEntry<float> defaultCooldown;
     public static ConfigEntry<int> killSwitchLvl;
 
+    public static RoutineManager routines;
+    public static NotificationManager notifications;
+
     public override void Load()
     {
+        Instance = this;
         Log = base.Log;
+		Log.LogInfo($"HyperMenu has loaded!");
         Plugin = this;
+        notifications = AddComponent<NotificationManager>();
+        routines = AddComponent<RoutineManager>();
 
         // Loads config settings
         menuKeybind = Config.Bind("MalumMenu.GUI",
@@ -69,6 +86,11 @@ public partial class MalumMenu : BasePlugin
                                 "Color",
                                 "",
                                 "A custom color for your MalumMenu GUI. Supports html color codes");
+
+        menuChatColor = Config.Bind("MalumMenu.GUI",
+                                "ChatColor",
+                                "",
+                                "A custom HTML color code for your in-game chat messages. Supports html color codes");
 
         menuOpenOnMouse = Config.Bind("MalumMenu.GUI",
                                 "OpenOnMouse",
@@ -168,6 +190,7 @@ public partial class MalumMenu : BasePlugin
                                 ));
 
         // Enabled by default
+        CheatToggles.antiOverload = true;
         CheatToggles.unlockFeatures = true;
         CheatToggles.freeCosmetics = true;
         CheatToggles.avoidPenalties = true;
@@ -191,6 +214,7 @@ public partial class MalumMenu : BasePlugin
         doorsUI = AddComponent<DoorsUI>();
         tasksUI = AddComponent<TasksUI>();
         protectUI = AddComponent<ProtectUI>();
+        streamerUI = AddComponent<StreamerUI>();
         // rolesUI = AddComponent<RolesUI>();
 
         // Components
@@ -221,9 +245,12 @@ public partial class MalumMenu : BasePlugin
             if (scene.name == "MainMenu" && !(inStealthMode || isPanicked))
             {
                 // Warns about unsupported AU versions
-                if (!supportedAU.Contains(Application.version))
+                if (!supportedAU.Contains(Application.version) && !toleratedAU.Contains(Application.version))
                 {
-                    Utils.ShowPopup("\nThis version of MalumMenu and this version of Among Us are incompatible\n\nInstall the right version to avoid problems");
+                    Utils.ShowNewPopup("This version of HyperMenu and this version of Among Us are incompatible\n\nInstall the right version to avoid problems");
+                } else if (!supportedAU.Contains(Application.version) && toleratedAU.Contains(Application.version))
+                {
+                    Utils.ShowNewPopup("This version of HyperMenu and this version of Among Us are not fully compatible\n\nSome features may not work properly, as HyperMenu is not updated to keep compatibility with older Among Us versions.");
                 }
             }
         }));

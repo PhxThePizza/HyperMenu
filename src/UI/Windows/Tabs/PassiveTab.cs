@@ -17,6 +17,8 @@ public class PassiveTab : ITab
 
     private void DrawGeneral()
     {
+        CheatToggles.antiOverload = GUILayout.Toggle(CheatToggles.antiOverload, " Anti-Overload");
+
         CheatToggles.freeCosmetics = GUILayout.Toggle(CheatToggles.freeCosmetics, " Free Cosmetics");
 
         CheatToggles.avoidPenalties = GUILayout.Toggle(CheatToggles.avoidPenalties, " Avoid Penalties");
@@ -26,5 +28,12 @@ public class PassiveTab : ITab
         CheatToggles.copyLobbyCodeOnDisconnect = GUILayout.Toggle(CheatToggles.copyLobbyCodeOnDisconnect, " Copy Lobby Code on Disconnect");
 
         CheatToggles.spoofAprilFoolsDate = GUILayout.Toggle(CheatToggles.spoofAprilFoolsDate, " Spoof Date to April 1st");
+
+        CheatToggles.randomizeCosmetics = GUILayout.Toggle(CheatToggles.randomizeCosmetics, " Randomize on Lobby Join");
+
+        if (GUILayout.Button(" Randomize Now", GUILayout.Width(200)))
+        {
+            MalumRandomizer.Randomize();
+        }
     }
 }
