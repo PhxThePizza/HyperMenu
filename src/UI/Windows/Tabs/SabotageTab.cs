@@ -18,6 +18,9 @@ public class SabotageTab : ITab
 
         Sabotage.UpdateSystemsDirectly = GUILayout.Toggle(Sabotage.UpdateSystemsDirectly, "Update Sabotage Systems Directly");
 
+        // Toggle to enable/disable clients requesting host to close keep-closed rooms every 5 seconds (Skeld/Dleks)
+        CheatToggles.autoRequestKeepClosed = GUILayout.Toggle(CheatToggles.autoRequestKeepClosed, "Req close every 5s", GUIStylePreset.NormalToggle);
+
         Dictionary<string, SystemTypes> sabotages = Sabotage.GetSabotages();
         Dictionary<string, SystemTypes> doors = Sabotage.GetDoors();
 

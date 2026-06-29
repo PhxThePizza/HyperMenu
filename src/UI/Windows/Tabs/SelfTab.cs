@@ -127,7 +127,7 @@ namespace MalumMenu
 
             GUILayout.Space(5);
             GUILayout.Label($"Update level to: {level + 1}");
-            level = (uint)GUILayout.HorizontalSlider(level, 0, 199);
+            level = (uint)GUILayout.HorizontalSlider(level, 0, 2380);
 
             if (GUILayout.Button("Send Level Update"))
             {

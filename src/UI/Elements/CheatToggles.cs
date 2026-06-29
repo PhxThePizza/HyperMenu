@@ -105,6 +105,7 @@ public struct CheatToggles
     public static bool closeAllDoors;
     public static bool spamOpenAllDoors;
     public static bool spamCloseAllDoors;
+    public static bool autoRequestKeepClosed;
     public static bool sabotageMap;
 
     // Vents
